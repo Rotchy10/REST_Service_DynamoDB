@@ -15,8 +15,6 @@ import org.springframework.http.HttpStatus;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ErrorResponse {
 
-    private HttpStatus httpStatus;
-
     private String error;
 
     private String message;

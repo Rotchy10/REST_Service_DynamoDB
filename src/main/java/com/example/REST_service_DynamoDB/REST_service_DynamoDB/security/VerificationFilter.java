@@ -21,6 +21,7 @@ public class VerificationFilter implements UserVerficationFilter{
 
 
     private final String BEARER = "Bearer ";
+    private final String ADMINROLE = "internal_administrator_104267_137196";
 
     @Override
     public Mono<ServerResponse> filter(ServerRequest request, HandlerFunction<ServerResponse> next) {
@@ -39,21 +40,47 @@ public class VerificationFilter implements UserVerficationFilter{
             }catch (RuntimeException e){
                 log.error("[VERIFICATION] Failed to decode given JWT Auth0 Token: {}", authJWTtoken);
                 return ServerResponse.status(HttpStatus.UNAUTHORIZED).body(BodyInserters.fromValue(ErrorResponse.builder()
-                                .httpStatus(HttpStatus.UNAUTHORIZED)
                                 .error("UNAUTHRORIZED")
                                 .message("Credentials are missing or invalid")
                                 .time(LocalDateTime.now().format(dateTimeFormatter))
                         .build()));
             }
 
-            log.info("Received " + decodedJWTtoken.getClaim("name").toString());
+            if(decodedJWTtoken.getClaim("role").toString() != null &&
+                    decodedJWTtoken.getClaim("name").toString() != null &&
+                    decodedJWTtoken.getClaim("departmentCode").toString() != null)
+            {
+                String roles = decodedJWTtoken.getClaim("role").toString();
+                log.info("[VERIFICATION] Received token with Roles: {}", roles);
 
-
-
-
+                if (!roles.contains(ADMINROLE)){
+                    return ServerResponse.status(HttpStatus.UNAUTHORIZED).body(BodyInserters.fromValue(ErrorResponse.builder()
+                            .error("UNAUTHRORIZED")
+                            .message("Credentials are missing or invalid")
+                            .time(LocalDateTime.now().format(dateTimeFormatter))
+                            .build()));
+                }else {
+                    log.info("[AUTHROIZED] {} authorized with Department Code {}", decodedJWTtoken.getClaim("name").toString()
+                            , decodedJWTtoken.getClaim("departmentCode").toString());
+                }
+            }
+            else
+            {
+                log.info("[VERIFICATION] Given token is missing or invalid.");
+                return ServerResponse.status(HttpStatus.UNAUTHORIZED).body(BodyInserters.fromValue(ErrorResponse.builder()
+                        .error("UNAUTHRORIZED")
+                        .message("Credentials are missing or invalid")
+                        .time(LocalDateTime.now().format(dateTimeFormatter))
+                        .build()));
+            }
 
         }else {
-            log.info("[VERIFICATION]");
+            log.info("[VERIFICATION] Given token is missing or invalid.");
+            return ServerResponse.status(HttpStatus.UNAUTHORIZED).body(BodyInserters.fromValue(ErrorResponse.builder()
+                    .error("UNAUTHRORIZED")
+                    .message("Credentials are missing or invalid")
+                    .time(LocalDateTime.now().format(dateTimeFormatter))
+                    .build()));
         }
 
         return next.handle(request);
