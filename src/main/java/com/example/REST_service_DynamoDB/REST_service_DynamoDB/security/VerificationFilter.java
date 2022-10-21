@@ -26,8 +26,6 @@ public class VerificationFilter implements UserVerficationFilter{
     @Override
     public Mono<ServerResponse> filter(ServerRequest request, HandlerFunction<ServerResponse> next) {
 
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("E, MMM-dd-yyyy");
-
         String authJWTtoken = request.headers().asHttpHeaders().getFirst("Authorization");
         log.info("[VERIFICATION] Attempting to Authenticate User with token : " + authJWTtoken);
 
@@ -39,11 +37,7 @@ public class VerificationFilter implements UserVerficationFilter{
                 decodedJWTtoken = JWT.decode(authJWTtoken);
             }catch (RuntimeException e){
                 log.error("[VERIFICATION] Failed to decode given JWT Auth0 Token: {}", authJWTtoken);
-                return ServerResponse.status(HttpStatus.UNAUTHORIZED).body(BodyInserters.fromValue(ErrorResponse.builder()
-                                .error("UNAUTHRORIZED")
-                                .message("Credentials are missing or invalid")
-                                .time(LocalDateTime.now().format(dateTimeFormatter))
-                        .build()));
+                return createUnauthorizedServerResponse();
             }
 
             if(decodedJWTtoken.getClaim("role").toString() != null &&
@@ -54,11 +48,7 @@ public class VerificationFilter implements UserVerficationFilter{
                 log.info("[VERIFICATION] Received token with Roles: {}", roles);
 
                 if (!roles.contains(ADMINROLE)){
-                    return ServerResponse.status(HttpStatus.UNAUTHORIZED).body(BodyInserters.fromValue(ErrorResponse.builder()
-                            .error("UNAUTHRORIZED")
-                            .message("Credentials are missing or invalid")
-                            .time(LocalDateTime.now().format(dateTimeFormatter))
-                            .build()));
+                    return createUnauthorizedServerResponse();
                 }else {
                     log.info("[AUTHROIZED] {} authorized with Department Code {}", decodedJWTtoken.getClaim("name").toString()
                             , decodedJWTtoken.getClaim("departmentCode").toString());
@@ -67,22 +57,28 @@ public class VerificationFilter implements UserVerficationFilter{
             else
             {
                 log.info("[VERIFICATION] Given token is missing or invalid.");
-                return ServerResponse.status(HttpStatus.UNAUTHORIZED).body(BodyInserters.fromValue(ErrorResponse.builder()
-                        .error("UNAUTHRORIZED")
-                        .message("Credentials are missing or invalid")
-                        .time(LocalDateTime.now().format(dateTimeFormatter))
-                        .build()));
+                return createUnauthorizedServerResponse();
             }
 
         }else {
             log.info("[VERIFICATION] Given token is missing or invalid.");
-            return ServerResponse.status(HttpStatus.UNAUTHORIZED).body(BodyInserters.fromValue(ErrorResponse.builder()
-                    .error("UNAUTHRORIZED")
-                    .message("Credentials are missing or invalid")
-                    .time(LocalDateTime.now().format(dateTimeFormatter))
-                    .build()));
+            return createUnauthorizedServerResponse();
         }
 
         return next.handle(request);
     }
+
+    public Mono<ServerResponse> createUnauthorizedServerResponse(){
+
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("E, MMM-dd-yyyy");
+
+        return ServerResponse.status(HttpStatus.UNAUTHORIZED).body(BodyInserters.fromValue(ErrorResponse.builder()
+                .error("UNAUTHRORIZED")
+                .message("Credentials are missing or invalid")
+                .time(LocalDateTime.now().format(dateTimeFormatter))
+                .build()));
+    }
+
+
+
 }
