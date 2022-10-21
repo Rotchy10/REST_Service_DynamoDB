@@ -14,7 +14,7 @@ public class EmployeeService {
         this.employeeRepository = employeeRepository;
     }
 
-    public Mono<Employee> createNewCustomer(Employee employee){
+    public Mono<Employee> saveEmployee(Employee employee){
         return Mono.fromFuture(employeeRepository.save(employee))
                 .thenReturn(employee);
     }

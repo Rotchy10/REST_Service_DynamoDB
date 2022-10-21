@@ -38,7 +38,7 @@ public class EmployeeHandler {
                 .doOnNext(jsonNode -> log.info("[POST] Request received to add new Employee: " + jsonNode))
                 .flatMap(jsonNode -> Mono.just(jsonNode)
                         .map(this::createEmplyee)
-                        .flatMap(employeeService::createNewCustomer)
+                        .flatMap(employeeService::saveEmployee)
                         .flatMap(employee -> ServerResponse.ok().body(BodyInserters.fromValue(employee))));
 
 
