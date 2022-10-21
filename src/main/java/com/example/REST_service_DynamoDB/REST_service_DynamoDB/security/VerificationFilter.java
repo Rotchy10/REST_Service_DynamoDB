@@ -19,7 +19,6 @@ import java.time.format.DateTimeFormatter;
 @Component
 public class VerificationFilter implements UserVerficationFilter{
 
-
     private final String BEARER = "Bearer ";
     private final String ADMINROLE = "internal_administrator_104267_137196";
 
