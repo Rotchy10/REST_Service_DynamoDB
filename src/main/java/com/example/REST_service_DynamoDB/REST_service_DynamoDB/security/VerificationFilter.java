@@ -67,13 +67,13 @@ public class VerificationFilter implements UserVerficationFilter{
         return next.handle(request);
     }
 
-    public Mono<ServerResponse> createUnauthorizedServerResponse(){
+    private Mono<ServerResponse> createUnauthorizedServerResponse(){
 
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("E, MMM-dd-yyyy");
 
         return ServerResponse.status(HttpStatus.UNAUTHORIZED).body(BodyInserters.fromValue(ErrorResponse.builder()
                 .error("UNAUTHRORIZED")
-                .message("Credentials are missing or invalid")
+                .message("Verification credentials are missing or invalid")
                 .time(LocalDateTime.now().format(dateTimeFormatter))
                 .build()));
     }

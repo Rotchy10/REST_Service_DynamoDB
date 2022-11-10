@@ -37,81 +37,14 @@ public class EmployeeHandler {
         return serverRequest.bodyToMono(JsonNode.class)
                 .doOnNext(jsonNode -> log.info("[POST] Request received to add new Employee: " + jsonNode))
                 .flatMap(jsonNode -> Mono.just(jsonNode)
-                        .map(this::createEmplyee)
+                        .map(this::createEmployee)
                         .flatMap(employeeService::saveEmployee)
                         .flatMap(employee -> ServerResponse.ok().body(BodyInserters.fromValue(employee))));
-
-
-
-
-//        return serverRequest.bodyToMono(JsonNode.class)
-//                .doOnNext(jsonNode -> log.info("[POST] Request received to add new Employee: " + jsonNode))
-//                .then(ServerResponse.ok().body(BodyInserters.fromValue(Employee.builder()
-//                        .employeeId(UUID.randomUUID().toString())
-//                        .badgeId(generateNewBadgeNumber())
-//                        .employeeFirstName("Rotchy")
-//                        .employeeLastName("Moricette")
-//                        .employeeEmail("Rotchy0913moricette@gmail.com")
-//                        .employeeAddress(
-//                                EmployeeAddress.builder()
-//                                        .addressLine1("8905 Citrus Village Drive")
-//                                        .addressLine2("Apt 302")
-//                                        .city("Tampa")
-//                                        .stateProvidence("Florida")
-//                                        .postalCode("33626")
-//                                        .build())
-//                        .phoneNumber("754-465-4228")
-//                        .hireDate("10/14/2022")
-//                        .lineOfBusiness("Marketing")
-//                        .managerName("Rishinthan Sivasamy")
-//                        .parkingDescription(ParkingDescription.builder()
-//                                .parkingDecalNumber(UUID.randomUUID().toString().substring(0,6).toUpperCase())
-//                                .employeeVehicle(Vehicle.builder()
-//                                        .color("White")
-//                                        .make("Toyota")
-//                                        .model("Camry")
-//                                        .year("2016")
-//                                        .plateNumber("GJHV12")
-//                                        .build())
-//                                .build())
-//                        .build())));
-
-//        return ServerResponse.ok().body(BodyInserters.fromValue(
-//                Employee.builder()
-//                        .employeeId(UUID.randomUUID().toString())
-//                        .badgeNumber(generateNewBadgeNumber())
-//                        .employeeFirstName("Rotchy")
-//                        .employeeLastName("Moricette")
-//                        .employeeEmail("Rotchy0913moricette@gmail.com")
-//                        .employeeAddress(
-//                                EmployeeAddress.builder()
-//                                        .addressLine1("8905 Citrus Village Drive")
-//                                        .addressLine2("Apt 302")
-//                                        .city("Tampa")
-//                                        .stateProvidence("Florida")
-//                                        .postalCode("33626")
-//                                        .build())
-//                        .phoneNumber("754-465-4228")
-//                        .hireDate("10/14/2022")
-//                        .lineOfBusiness("Marketing")
-//                        .managerName("Rishinthan Sivasamy")
-//                        .parkingDescription(ParkingDescription.builder()
-//                                .parkingDecalNumber(UUID.randomUUID().toString().substring(0,6).toUpperCase())
-//                                .employeeVehicle(Vehicle.builder()
-//                                        .color("White")
-//                                        .make("Toyota")
-//                                        .model("Camry")
-//                                        .year("2016")
-//                                        .plateNumber("GJHV12")
-//                                        .build())
-//                                .build())
-//                        .build()
-//        ));
     }
 
-    private Employee createEmplyee(JsonNode jsonNode) {
+    private Employee createEmployee(JsonNode jsonNode) {
         String newEmployeeID = UUID.randomUUID().toString();
-        String newBadgeID = generateNewBadgeNumber();
+        String newBadgeID = generateNewBadgeNumber(jsonNode.get("employeeLastName").asText());
         String newCarDecal = generateNewParkingDecal();
         Employee new_Employee = null;
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("E, MMM-dd-yyyy");
@@ -135,12 +68,11 @@ public class EmployeeHandler {
         return UUID.randomUUID().toString().substring(0,6).toUpperCase();
     }
 
-    public String generateNewBadgeNumber(){
-        String name = "Moricette";
+    public String generateNewBadgeNumber(String employeeLastName){
         Random rnd = new Random();
         int number = rnd.nextInt(999999);
 
-        return name.charAt(0) + String.format("%06d", number);
+        return employeeLastName.charAt(0) + String.format("%06d", number);
     }
 }
 
