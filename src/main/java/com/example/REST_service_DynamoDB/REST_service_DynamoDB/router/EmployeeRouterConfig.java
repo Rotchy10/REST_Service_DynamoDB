@@ -1,8 +1,10 @@
 package com.example.REST_service_DynamoDB.REST_service_DynamoDB.router;
 
 import com.example.REST_service_DynamoDB.REST_service_DynamoDB.handler.EmployeeHandler;
+import com.example.REST_service_DynamoDB.REST_service_DynamoDB.security.UserVerficationFilter;
 import com.example.REST_service_DynamoDB.REST_service_DynamoDB.security.VerificationFilter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
@@ -16,7 +18,7 @@ import static org.springframework.web.reactive.function.server.RequestPredicates
 public class EmployeeRouterConfig {
 
     private final EmployeeHandler employeeHandler;
-    private final VerificationFilter verificationFilter;
+    private final UserVerficationFilter verificationFilter;
 
     @Bean
     public RouterFunction<ServerResponse> employeeRouterFunction(){
